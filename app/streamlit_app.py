@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import nltk
 import re
+import os
 import matplotlib.pyplot as plt
 
 from nltk.corpus import stopwords
@@ -45,7 +46,7 @@ nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
 # -------------------------------
-# Cleaning Function
+# Text Cleaning
 # -------------------------------
 def clean_text(text):
     text = str(text).lower()
@@ -55,10 +56,32 @@ def clean_text(text):
     return " ".join(words)
 
 # -------------------------------
-# Load Data
+# Sidebar
 # -------------------------------
-df = pd.read_csv("data/cleaned_news.csv")
+st.sidebar.title("📂 Dataset Options")
+
+uploaded_file = st.sidebar.file_uploader("Upload cleaned_news.csv", type=["csv"])
+
+df = None
+
+# -------------------------------
+# Load Dataset (Flexible)
+# -------------------------------
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+
+elif os.path.exists("data/cleaned_news.csv"):
+    df = pd.read_csv("data/cleaned_news.csv")
+
+else:
+    st.warning("⚠️ Dataset not found. Upload cleaned_news.csv from sidebar.")
+    st.stop()
+
+# -------------------------------
+# Prepare Data
+# -------------------------------
 df = df.dropna(subset=['clean_text'])
+df['clean_text'] = df['clean_text'].astype(str)
 
 # -------------------------------
 # Model Training
@@ -71,30 +94,19 @@ model = LogisticRegression()
 model.fit(X, y)
 
 # -------------------------------
-# Sidebar
-# -------------------------------
-st.sidebar.title("About")
-st.sidebar.info("""
-This app detects whether a news article is FAKE or REAL using NLP and Machine Learning.
-""")
-
-st.sidebar.subheader("Example Input")
-st.sidebar.write("Breaking: Government announces new policy to boost economy.")
-
-# -------------------------------
-# Main UI
+# UI
 # -------------------------------
 st.title("📰 Fake News Detector")
-st.markdown("Detect whether a news article is **Fake or Real** using AI")
+st.markdown("Detect whether a news article is **Fake or Real using AI**")
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📝 Enter News Text")
-    user_input = st.text_area("")
+    user_input = st.text_area("Paste news content here...")
 
 with col2:
-    st.subheader("📌 Prediction")
+    st.subheader("📌 Prediction Result")
 
     if st.button("Analyze News"):
         if user_input.strip() != "":
@@ -110,9 +122,9 @@ with col2:
             st.warning("Please enter some text")
 
 # -------------------------------
-# Data Visualization
+# Visualization
 # -------------------------------
-st.subheader("📊 Dataset Distribution")
+st.subheader("📊 Dataset Insights")
 
 label_counts = df['label'].value_counts()
 
@@ -127,4 +139,4 @@ st.pyplot(fig)
 # Footer
 # -------------------------------
 st.markdown("---")
-st.markdown("💡 Built using NLP + Machine Learning | Streamlit App")
+st.markdown("💡 Built using NLP + Machine Learning | Streamlit")
