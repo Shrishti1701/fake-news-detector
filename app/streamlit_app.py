@@ -19,34 +19,36 @@ st.set_page_config(
 )
 
 # -------------------------------
-# Styling
+# Custom CSS
 # -------------------------------
 st.markdown("""
-    <style>
-    .main {
-        background-color: #0E1117;
-        color: white;
-    }
-    h1, h2 {
-        color: #00BFFF;
-    }
-    .stButton>button {
-        background-color: #00BFFF;
-        color: white;
-        border-radius: 10px;
-        padding: 10px;
-    }
-    </style>
+<style>
+.big-title {
+    font-size: 42px;
+    font-weight: bold;
+    color: #00BFFF;
+}
+.subtitle {
+    font-size: 18px;
+    color: #A9A9A9;
+}
+.result-box {
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 20px;
+    text-align: center;
+}
+</style>
 """, unsafe_allow_html=True)
 
 # -------------------------------
-# Setup
+# NLTK Setup
 # -------------------------------
-nltk.download('stopwords')
+nltk.download('stopwords', quiet=True)
 stop_words = set(stopwords.words('english'))
 
 # -------------------------------
-# Text Cleaning
+# Clean Text
 # -------------------------------
 def clean_text(text):
     text = str(text).lower()
@@ -58,24 +60,33 @@ def clean_text(text):
 # -------------------------------
 # Sidebar
 # -------------------------------
-st.sidebar.title("📂 Dataset Options")
+st.sidebar.title("⚙️ Options")
 
-uploaded_file = st.sidebar.file_uploader("Upload cleaned_news.csv", type=["csv"])
-
-df = None
+uploaded_file = st.sidebar.file_uploader("Upload dataset (CSV)", type=["csv"])
 
 # -------------------------------
-# Load Dataset (Flexible)
+# Load Dataset (Smart)
 # -------------------------------
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+try:
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.sidebar.success("Custom dataset loaded ✅")
+    elif os.path.exists("data/sample_news.csv"):
+        df = pd.read_csv("data/sample_news.csv")
+    else:
+        raise Exception
 
-elif os.path.exists("data/cleaned_news.csv"):
-    df = pd.read_csv("data/cleaned_news.csv")
-
-else:
-    st.warning("⚠️ Dataset not found. Upload cleaned_news.csv from sidebar.")
-    st.stop()
+except:
+    st.sidebar.warning("Using demo dataset ⚠️")
+    df = pd.DataFrame({
+        "clean_text": [
+            "government announces new policy",
+            "economy shows growth and stability",
+            "shocking conspiracy spreads online",
+            "fake rumor spreads rapidly"
+        ],
+        "label": [1, 1, 0, 0]
+    })
 
 # -------------------------------
 # Prepare Data
@@ -84,9 +95,9 @@ df = df.dropna(subset=['clean_text'])
 df['clean_text'] = df['clean_text'].astype(str)
 
 # -------------------------------
-# Model Training
+# Train Model
 # -------------------------------
-vectorizer = TfidfVectorizer(max_features=5000)
+vectorizer = TfidfVectorizer(max_features=3000)
 X = vectorizer.fit_transform(df['clean_text'])
 y = df['label']
 
@@ -94,44 +105,52 @@ model = LogisticRegression()
 model.fit(X, y)
 
 # -------------------------------
-# UI
+# UI Header
 # -------------------------------
-st.title("📰 Fake News Detector")
-st.markdown("Detect whether a news article is **Fake or Real using AI**")
+st.markdown('<p class="big-title">📰 Fake News Detector</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Detect whether a news article is Fake or Real using Machine Learning</p>', unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+# -------------------------------
+# Layout
+# -------------------------------
+col1, col2 = st.columns([2, 1])
 
 with col1:
     st.subheader("📝 Enter News Text")
-    user_input = st.text_area("Paste news content here...")
+    user_input = st.text_area("Paste news content here...", height=200)
 
 with col2:
-    st.subheader("📌 Prediction Result")
+    st.subheader("📊 Model Info")
+    st.metric("Dataset Size", len(df))
+    st.metric("Features", X.shape[1])
 
-    if st.button("Analyze News"):
-        if user_input.strip() != "":
-            cleaned = clean_text(user_input)
-            vector = vectorizer.transform([cleaned])
-            prediction = model.predict(vector)[0]
+# -------------------------------
+# Prediction
+# -------------------------------
+if st.button("🔍 Analyze News"):
+    if user_input.strip() != "":
+        cleaned = clean_text(user_input)
+        vector = vectorizer.transform([cleaned])
+        prediction = model.predict(vector)[0]
 
-            if prediction == 1:
-                st.success("✅ This News is REAL")
-            else:
-                st.error("❌ This News is FAKE")
+        if prediction == 1:
+            st.markdown('<div class="result-box" style="background-color:#1e7e34;color:white;">✅ REAL NEWS</div>', unsafe_allow_html=True)
         else:
-            st.warning("Please enter some text")
+            st.markdown('<div class="result-box" style="background-color:#c82333;color:white;">❌ FAKE NEWS</div>', unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ Please enter some text")
 
 # -------------------------------
 # Visualization
 # -------------------------------
-st.subheader("📊 Dataset Insights")
+st.subheader("📈 Dataset Insights")
 
 label_counts = df['label'].value_counts()
 
 fig, ax = plt.subplots()
 label_counts.plot(kind='bar', ax=ax)
 ax.set_xticklabels(["Fake", "Real"])
-ax.set_title("Fake vs Real News Distribution")
+ax.set_title("Fake vs Real Distribution")
 
 st.pyplot(fig)
 
@@ -139,4 +158,4 @@ st.pyplot(fig)
 # Footer
 # -------------------------------
 st.markdown("---")
-st.markdown("💡 Built using NLP + Machine Learning | Streamlit")
+st.markdown("💡 Built with NLP, TF-IDF & Logistic Regression | Streamlit App")
