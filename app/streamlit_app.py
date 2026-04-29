@@ -1,163 +1,108 @@
 import streamlit as st
-import pandas as pd
+import pickle
 import nltk
 import re
 import os
-import matplotlib.pyplot as plt
+import requests
+
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
 
 # -------------------------------
-# Page Config
+# CONFIG
 # -------------------------------
-st.set_page_config(
-    page_title="Fake News Detector",
-    layout="wide",
-    page_icon="📰"
-)
+st.set_page_config(page_title="Fake News Detector", layout="wide")
+
+API_KEY = "YOUR_API_KEY_HERE"  # 🔥 ADD YOUR KEY
 
 # -------------------------------
-# Custom CSS
+# LOAD MODEL
 # -------------------------------
-st.markdown("""
-<style>
-.big-title {
-    font-size: 42px;
-    font-weight: bold;
-    color: #00BFFF;
-}
-.subtitle {
-    font-size: 18px;
-    color: #A9A9A9;
-}
-.result-box {
-    padding: 20px;
-    border-radius: 10px;
-    font-size: 20px;
-    text-align: center;
-}
-</style>
-""", unsafe_allow_html=True)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+model = pickle.load(open(os.path.join(BASE_DIR, "model.pkl"), "rb"))
+vectorizer = pickle.load(open(os.path.join(BASE_DIR, "vectorizer.pkl"), "rb"))
 
 # -------------------------------
-# NLTK Setup
+# NLTK
 # -------------------------------
 nltk.download('stopwords', quiet=True)
 stop_words = set(stopwords.words('english'))
 
 # -------------------------------
-# Clean Text Function
+# CLEAN TEXT
 # -------------------------------
 def clean_text(text):
     text = str(text).lower()
     text = re.sub(r'[^a-zA-Z\s]', '', text)
     words = text.split()
-    words = [word for word in words if word not in stop_words]
+    words = [w for w in words if w not in stop_words]
     return " ".join(words)
 
 # -------------------------------
-# Sidebar
+# NEWS API CHECK
 # -------------------------------
-st.sidebar.title("⚙️ Options")
-uploaded_file = st.sidebar.file_uploader("Upload dataset (CSV)", type=["csv"])
+def check_news_api(query):
+    url = f"https://newsapi.org/v2/everything?q={query}&apiKey={API_KEY}"
+    response = requests.get(url)
+    data = response.json()
+
+    if data["status"] == "ok" and data["totalResults"] > 0:
+        return True, data["articles"][:3]  # return top 3 articles
+    return False, []
 
 # -------------------------------
-# Load Dataset (Smart)
+# UI
 # -------------------------------
-try:
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-        st.sidebar.success("Custom dataset loaded ✅")
-    elif os.path.exists("data/sample_news.csv"):
-        df = pd.read_csv("data/sample_news.csv")
-    else:
-        raise Exception
-except:
-    st.sidebar.warning("Using demo dataset ⚠️")
-    df = pd.DataFrame({
-        "clean_text": [
-            "government announces new policy",
-            "economy shows growth and stability",
-            "shocking conspiracy spreads online",
-            "fake rumor spreads rapidly"
-        ],
-        "label": [1, 1, 0, 0]
-    })
+st.title("📰 Fake News Detector (Hybrid AI + API)")
+st.write("Combines Machine Learning + Real-time News Verification")
+
+user_input = st.text_area("Enter News Text")
 
 # -------------------------------
-# Prepare Data
+# ANALYZE
 # -------------------------------
-df = df.dropna(subset=['clean_text'])
-df['clean_text'] = df['clean_text'].astype(str)
-
-# -------------------------------
-# Train Model
-# -------------------------------
-vectorizer = TfidfVectorizer(max_features=3000)
-X = vectorizer.fit_transform(df['clean_text'])
-y = df['label']
-
-model = LogisticRegression()
-model.fit(X, y)
-
-# -------------------------------
-# UI Header
-# -------------------------------
-st.markdown('<p class="big-title">📰 Fake News Detector</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Detect whether a news article is Fake or Real using Machine Learning</p>', unsafe_allow_html=True)
-
-# -------------------------------
-# Layout
-# -------------------------------
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    st.subheader("📝 Enter News Text")
-    user_input = st.text_area("Paste news content here...", height=200)
-
-with col2:
-    st.subheader("📊 Model Info")
-    st.metric("Dataset Size", len(df))
-    st.metric("Features", X.shape[1])
-
-# -------------------------------
-# Prediction
-# -------------------------------
-if st.button("🔍 Analyze News"):
+if st.button("Analyze"):
     if user_input.strip() != "":
+        
+        # ML Prediction
         cleaned = clean_text(user_input)
         vector = vectorizer.transform([cleaned])
         prediction = model.predict(vector)[0]
 
+        ml_result = "REAL" if prediction == 1 else "FAKE"
+
+        # API Check
+        found, articles = check_news_api(user_input)
+
+        # -------------------------------
+        # FINAL DECISION
+        # -------------------------------
+        st.subheader("🧠 ML Prediction")
         if prediction == 1:
-            st.markdown(
-                '<div class="result-box" style="background-color:#1e7e34;color:white;">✅ REAL NEWS</div>',
-                unsafe_allow_html=True
-            )
+            st.success("Model: REAL")
         else:
-            st.markdown(
-                '<div class="result-box" style="background-color:#c82333;color:white;">❌ FAKE NEWS</div>',
-                unsafe_allow_html=True
-            )
+            st.error("Model: FAKE")
+
+        st.subheader("🌐 News API Verification")
+
+        if found:
+            st.success("News found in real sources ✅")
+            for article in articles:
+                st.write(f"🔗 {article['title']}")
+        else:
+            st.warning("No matching news found ⚠️")
+
+        # -------------------------------
+        # FINAL RESULT
+        # -------------------------------
+        st.subheader("🎯 Final Verdict")
+
+        if prediction == 1 and found:
+            st.success("✅ Highly Likely REAL NEWS")
+        elif prediction == 0 and not found:
+            st.error("❌ Highly Likely FAKE NEWS")
+        else:
+            st.warning("⚠️ Uncertain (Mixed Signals)")
+
     else:
-        st.warning("⚠️ Please enter some text")
-
-# -------------------------------
-# Visualization
-# -------------------------------
-st.subheader("📈 Dataset Insights")
-label_counts = df['label'].value_counts()
-
-fig, ax = plt.subplots()
-label_counts.plot(kind='bar', ax=ax)
-ax.set_xticklabels(["Fake", "Real"])
-ax.set_title("Fake vs Real Distribution")
-
-st.pyplot(fig)
-
-# -------------------------------
-# Footer
-# -------------------------------
-st.markdown("---")
-st.markdown("💡 Built with NLP, TF-IDF & Logistic Regression | Streamlit App")
+        st.warning("Enter some text")
