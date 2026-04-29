@@ -17,6 +17,24 @@ df = df.dropna(subset=['clean_text'])
 df['clean_text'] = df['clean_text'].astype(str)
 
 # -------------------------------
+# FIX LABELS (VERY IMPORTANT)
+# -------------------------------
+# Convert text labels to numeric safely
+df['label'] = df['label'].map({
+    'Fake': 0,
+    'Real': 1,
+    'FAKE': 0,
+    'TRUE': 1,
+    0: 0,
+    1: 1
+})
+
+# Drop invalid labels
+df = df.dropna(subset=['label'])
+
+print("✅ Label Distribution:\n", df['label'].value_counts())
+
+# -------------------------------
 # Features & Target
 # -------------------------------
 X = df['clean_text']
@@ -32,11 +50,11 @@ X = vectorizer.fit_transform(X)
 # Train-Test Split
 # -------------------------------
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
 
 # -------------------------------
-# Model (FIXED)
+# Model (BALANCED)
 # -------------------------------
 model = LogisticRegression(class_weight='balanced', max_iter=1000)
 model.fit(X_train, y_train)
@@ -46,9 +64,9 @@ model.fit(X_train, y_train)
 # -------------------------------
 y_pred = model.predict(X_test)
 
-print("✅ Model Training Completed!")
+print("\n✅ Model Training Completed!")
 print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
-print("\nClassification Report:\n")
+print("\n📊 Classification Report:\n")
 print(classification_report(y_test, y_pred))
 
 # -------------------------------

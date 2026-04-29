@@ -2,7 +2,7 @@ import streamlit as st
 import pickle
 import nltk
 import re
-import matplotlib.pyplot as plt
+import os
 
 from nltk.corpus import stopwords
 
@@ -12,10 +12,12 @@ from nltk.corpus import stopwords
 st.set_page_config(page_title="Fake News Detector", layout="wide")
 
 # -------------------------------
-# Load Model (IMPORTANT)
+# Load Model (CORRECT PATH)
 # -------------------------------
-model = pickle.load(open("model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+model = pickle.load(open(os.path.join(BASE_DIR, "model.pkl"), "rb"))
+vectorizer = pickle.load(open(os.path.join(BASE_DIR, "vectorizer.pkl"), "rb"))
 
 # -------------------------------
 # NLTK
@@ -37,7 +39,7 @@ def clean_text(text):
 # UI
 # -------------------------------
 st.title("📰 Fake News Detector")
-st.write("Detect whether news is Fake or Real using ML")
+st.write("Detect whether news is Fake or Real using Machine Learning")
 
 user_input = st.text_area("Enter News Text")
 
@@ -50,6 +52,7 @@ if st.button("Analyze"):
         vector = vectorizer.transform([cleaned])
         prediction = model.predict(vector)[0]
 
+        # ✅ CORRECT LABEL MAPPING
         if prediction == 1:
             st.success("✅ REAL NEWS")
         else:
@@ -58,13 +61,7 @@ if st.button("Analyze"):
         st.warning("Enter some text")
 
 # -------------------------------
-# Dummy Visualization (optional)
+# Footer
 # -------------------------------
-st.subheader("Sample Distribution")
-
-labels = ["Fake", "Real"]
-values = [50, 50]
-
-fig, ax = plt.subplots()
-ax.bar(labels, values)
-st.pyplot(fig)
+st.markdown("---")
+st.markdown("Built with NLP + TF-IDF + Logistic Regression")
