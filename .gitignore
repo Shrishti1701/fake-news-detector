@@ -1,2 +1,5 @@
+venv/
 data/
-*.csv
+*.pkl
+__pycache__/
+*.pyc
