@@ -1,176 +1,209 @@
-# 📰 Fake News Detector (ML + Real-Time API Verification)
+# 🧠📰 Fake News Detector Pro
 
-An intelligent web application that detects whether a news article is **Real or Fake** using Machine Learning and enhances reliability with **real-time news verification via API**.
+<p align="center">
+  <b>AI-powered Fake News Detection using Machine Learning + Real-Time Verification</b><br>
+  <i>Built with NLP, TF-IDF, Logistic Regression & News API</i>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Streamlit-App-red?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Machine%20Learning-Enabled-green?style=for-the-badge">
+  <img src="https://img.shields.io/badge/API-Integrated-orange?style=for-the-badge">
+</p>
 
 ---
 
 ## 🚀 Live Demo
 
-🔗 https://fake-news-detector-fefxyybivnmzeudmr28vvk.streamlit.app/
+👉 https://fake-news-detector-fefxyybivnmzeudmr28vvk.streamlit.app/
 
 ---
 
-## 📌 Features
+## 📸 Screenshots
 
-* 🔍 Detects Fake vs Real News using Machine Learning
-* 🌐 Verifies news using real-time News API
-* 🧠 Hybrid system (ML + API validation)
-* 📊 Dataset insights visualization
-* 📁 Upload custom dataset support
-* ⚡ Fast & interactive Streamlit UI
+> Add your screenshots in a folder named `assets/`
+
+```id="shots"
+assets/
+ ├── home.png
+ ├── result.png
+ └── api_check.png
+```
+
+<p align="center">
+  <img src="assets/home.png" width="45%">
+  <img src="assets/result.png" width="45%">
+</p>
+
+---
+
+## 🎯 Problem Statement
+
+With the rapid spread of misinformation online, identifying whether a news article is **real or fake** has become increasingly difficult.
+
+This project aims to:
+
+* Detect fake news using machine learning
+* Improve reliability using **real-time verification**
+* Provide a simple and interactive interface for users
+
+---
+
+## ⚡ Features
+
+* 🔍 Fake vs Real News Detection
+* 🌐 Live News Verification using API
+* 🧠 Hybrid AI System (ML + External Data)
+* 📊 Dataset Visualization
+* 📁 Upload Custom Dataset
+* ⚡ Fast, Interactive UI (Streamlit)
 
 ---
 
 ## 🧠 How It Works
 
-### 1. Text Processing
+### 🔹 Step 1: Text Preprocessing
 
-* Cleans input text (removes punctuation, stopwords, etc.)
+* Lowercasing
+* Removing punctuation
+* Stopword removal
 
-### 2. Feature Extraction
+### 🔹 Step 2: Feature Extraction
 
-* Uses **TF-IDF Vectorization** to convert text into numerical features
+* TF-IDF Vectorization converts text → numerical form
 
-### 3. Machine Learning Model
+### 🔹 Step 3: Model Training
 
-* **Logistic Regression** model trained on labeled dataset
+* Logistic Regression trained on labeled dataset
 
-### 4. Real-Time Verification
+### 🔹 Step 4: API Verification
 
-* Uses News API to check if similar news exists online
+* Searches real-time news using external API
 
-### 5. Final Verdict
+### 🔹 Step 5: Final Decision
 
-| ML Prediction | API Result | Final Output      |
-| ------------- | ---------- | ----------------- |
-| Real          | Found      | ✅ Highly Reliable |
-| Fake          | Not Found  | ❌ Likely Fake     |
-| Mixed         | Partial    | ⚠️ Uncertain      |
+| ML Result | API Result | Final Verdict     |
+| --------- | ---------- | ----------------- |
+| Real      | Found      | ✅ Highly Reliable |
+| Fake      | Not Found  | ❌ Likely Fake     |
+| Mixed     | Partial    | ⚠️ Uncertain      |
 
 ---
 
 ## 🛠️ Tech Stack
 
-* Python
-* Streamlit
-* Scikit-learn
-* Pandas
-* NLTK
-* Matplotlib
-* Requests (API integration)
+| Category      | Tools Used           |
+| ------------- | -------------------- |
+| Language      | Python               |
+| Frontend      | Streamlit            |
+| ML/NLP        | Scikit-learn, TF-IDF |
+| Data Handling | Pandas, NumPy        |
+| Visualization | Matplotlib           |
+| NLP Utils     | NLTK                 |
+| API           | Requests             |
 
 ---
 
 ## 📁 Project Structure
 
-```
+```id="struct"
 fake-news-detector/
 │
 ├── app/
-│   └── streamlit_app.py     # Main Streamlit app
-│
-├── data/                    # Dataset (ignored in GitHub)
+│   └── streamlit_app.py
 │
 ├── src/
-│   ├── model.py             # Model training script
-│   └── preprocessing.py     # Text cleaning logic
+│   ├── model.py
+│   └── preprocessing.py
 │
+├── data/                 # (ignored in GitHub)
+├── assets/               # screenshots
 ├── .streamlit/
-│   └── secrets.toml         # API key (not uploaded)
+│   └── secrets.toml
 │
 ├── requirements.txt
-├── README.md
-└── .gitignore
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## 🔐 API Setup (IMPORTANT)
+## 🔐 API Setup
 
-This project uses News API for real-time verification.
-
-### Step 1: Get API Key
+### 1. Get API Key
 
 👉 https://newsapi.org/
 
-### Step 2: Create file
+### 2. Create file
 
-```
+```id="sec"
 .streamlit/secrets.toml
 ```
 
-### Step 3: Add this
+### 3. Add key
 
-```toml
+```toml id="key"
 NEWS_API_KEY = "your_api_key_here"
 ```
 
-### ⚠️ Do NOT upload this file to GitHub
+⚠️ Do NOT upload this file to GitHub
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Installation
 
-### 1. Clone repository
-
-```bash
+```bash id="inst1"
 git clone https://github.com/YOUR_USERNAME/fake-news-detector.git
 cd fake-news-detector
 ```
 
-### 2. Create virtual environment
-
-```bash
+```bash id="inst2"
 python -m venv venv
-venv\Scripts\activate   # Windows
+venv\Scripts\activate
 ```
 
-### 3. Install dependencies
-
-```bash
+```bash id="inst3"
 pip install -r requirements.txt
 ```
 
-### 4. Run app
-
-```bash
+```bash id="inst4"
 streamlit run app/streamlit_app.py
 ```
 
 ---
 
-## 📊 Sample Output
+## 📊 Output
 
-* ✅ REAL NEWS
-* ❌ FAKE NEWS
-* 🌐 API verification links
-* 📈 Dataset visualization
+* ✅ Real News Detection
+* ❌ Fake News Detection
+* 🌐 Related News Links
+* 📈 Dataset Visualization
 
 ---
 
 ## 💡 Key Learnings
 
-* Importance of data cleaning in NLP
-* Feature extraction using TF-IDF
-* Model training & debugging
+* End-to-end ML pipeline building
+* Importance of data preprocessing
+* Debugging model bias issues
 * Real-world API integration
-* Building end-to-end ML applications
+* Deploying ML apps using Streamlit
 
 ---
 
 ## 🚧 Limitations
 
 * Model depends on dataset quality
-* API may not cover all news sources
-* Cannot guarantee 100% factual accuracy
+* API may not return all relevant news
+* Not a 100% fact-checking system
 
 ---
 
 ## 🚀 Future Improvements
 
 * Add BERT / Transformer models
-* Improve accuracy with larger datasets
-* Add explainability (why prediction?)
+* Explainable AI (why prediction?)
 * Multi-language support
 * Better UI/UX
 
@@ -183,6 +216,8 @@ streamlit run app/streamlit_app.py
 
 ---
 
-## ⭐ If you like this project
+## ⭐ Support
 
-Give it a star ⭐ on GitHub!
+If you like this project, give it a ⭐ on GitHub!
+
+---
