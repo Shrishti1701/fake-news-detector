@@ -26,15 +26,15 @@ An intelligent web application that detects whether a news article is Real or Fa
 
 ![Home](assets/home.png)
 
-![Dataset](assets/Dataset uploaded.png)
+![Dataset](assets/Dataset.png)
 
-![Result](assets/result.png)
+![Result](assets/Result.png)
 
 ```id="shots"
 assets/
  ├── home.png
- ├── Dataset uploaded.png
- └── result.png
+ ├── Dataset.png
+ └── Result.png
 ```
 
 <p align="center">
