@@ -7,6 +7,37 @@ import matplotlib.pyplot as plt
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+import requests
+
+# -------------------------------
+# NEWS API FUNCTION (ADDED)
+# -------------------------------
+def check_news_api(query):
+    try:
+        API_KEY = st.secrets["NEWS_API_KEY"]
+
+        # shorten query for better results
+        query = " ".join(query.split()[:10])
+
+        url = "https://newsapi.org/v2/everything"
+        params = {
+            "q": query,
+            "language": "en",
+            "sortBy": "relevancy",
+            "pageSize": 5,
+            "apiKey": API_KEY
+        }
+
+        response = requests.get(url, params=params)
+        data = response.json()
+
+        if data.get("status") == "ok" and data.get("totalResults", 0) > 0:
+            return True, data["articles"]
+
+    except Exception as e:
+        st.warning("⚠️ API not working or key missing")
+
+    return False, []
 
 # -------------------------------
 # Page Config
@@ -63,7 +94,7 @@ st.sidebar.title("⚙️ Options")
 uploaded_file = st.sidebar.file_uploader("Upload dataset (CSV)", type=["csv"])
 
 # -------------------------------
-# Load Dataset (Smart)
+# Load Dataset
 # -------------------------------
 try:
     if uploaded_file is not None:
@@ -122,7 +153,7 @@ with col2:
     st.metric("Features", X.shape[1])
 
 # -------------------------------
-# Prediction
+# Prediction + API (UPDATED)
 # -------------------------------
 if st.button("🔍 Analyze News"):
     if user_input.strip() != "":
@@ -130,6 +161,7 @@ if st.button("🔍 Analyze News"):
         vector = vectorizer.transform([cleaned])
         prediction = model.predict(vector)[0]
 
+        # ML RESULT
         if prediction == 1:
             st.markdown(
                 '<div class="result-box" style="background-color:#1e7e34;color:white;">✅ REAL NEWS</div>',
@@ -140,11 +172,39 @@ if st.button("🔍 Analyze News"):
                 '<div class="result-box" style="background-color:#c82333;color:white;">❌ FAKE NEWS</div>',
                 unsafe_allow_html=True
             )
+
+        # -------------------------------
+        # API VERIFICATION (ADDED)
+        # -------------------------------
+        st.subheader("🌐 Live News Verification")
+
+        found, articles = check_news_api(user_input)
+
+        if found:
+            st.success("News found in real sources ✅")
+
+            for article in articles[:3]:
+                st.markdown(f"🔗 [{article['title']}]({article['url']})")
+        else:
+            st.warning("No reliable sources found ⚠️")
+
+        # -------------------------------
+        # FINAL VERDICT (ADDED)
+        # -------------------------------
+        st.subheader("🎯 Final Verdict")
+
+        if prediction == 1 and found:
+            st.success("✅ Highly Reliable News")
+        elif prediction == 0 and not found:
+            st.error("❌ Highly Likely Fake News")
+        else:
+            st.warning("⚠️ Uncertain (Mixed Signals)")
+
     else:
         st.warning("⚠️ Please enter some text")
 
 # -------------------------------
-# Visualization
+# Visualization (UNCHANGED)
 # -------------------------------
 st.subheader("📈 Dataset Insights")
 label_counts = df['label'].value_counts()
@@ -160,4 +220,4 @@ st.pyplot(fig)
 # Footer
 # -------------------------------
 st.markdown("---")
-st.markdown("💡 Built with NLP, TF-IDF & Logistic Regression | Streamlit App")
+st.markdown("💡 Built with NLP, TF-IDF, API Integration & Logistic Regression | Streamlit App")
