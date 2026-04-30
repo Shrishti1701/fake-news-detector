@@ -1,4 +1,6 @@
-# 🧠📰 Fake News Detector Pro
+# 📰 Fake News Detector (ML + Real-Time API Verification)
+
+An intelligent web application that detects whether a news article is Real or Fake using Machine Learning and enhances reliability with real-time news verification via API.
 
 <p align="center">
   <b>AI-powered Fake News Detection using Machine Learning + Real-Time Verification</b><br>
@@ -22,13 +24,17 @@
 
 ## 📸 Screenshots
 
-> Add your screenshots in a folder named `assets/`
+![Home](assets/home.png)
+
+![Dataset](assets/Dataset uploaded.png)
+
+![Result](assets/result.png)
 
 ```id="shots"
 assets/
  ├── home.png
- ├── result.png
- └── api_check.png
+ ├── Dataset uploaded.png
+ └── result.png
 ```
 
 <p align="center">
