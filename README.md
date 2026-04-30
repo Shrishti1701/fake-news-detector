@@ -39,7 +39,8 @@ assets/
 
 <p align="center">
   <img src="assets/home.png" width="45%">
-  <img src="assets/result.png" width="45%">
+  <img src="assets/Dataset.png" width="45%">
+  <img src="assets/Result.png" width="45%">
 </p>
 
 ---
